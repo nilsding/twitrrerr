@@ -1,0 +1,5 @@
+.idea
+*~
+.yardoc
+doc
+lib/twitrrerr/ui/*.rb
