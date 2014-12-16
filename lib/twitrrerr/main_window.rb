@@ -10,7 +10,7 @@ module Twitrrerr
   class MainWindow < Qt::MainWindow
     include Twitrrerr::Helpers
 
-    slots 'add_new_account_action()', 'new_account_added(QString, QString, QString)'
+    slots 'add_new_account_action()', 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)'
 
     attr_accessor :accounts
 
@@ -20,7 +20,7 @@ module Twitrrerr
       @ui.setupUi self
       setWindowTitle "Twitrrerr #{Twitrrerr::VERSION}"
       @accounts = {}
-      create_actions
+      connect_actions
       load_accounts
     end
 
@@ -36,9 +36,12 @@ module Twitrrerr
       dlg.show
     end
 
-    def create_actions
+    def connect_actions
       connect @ui.action_add_new_account, SIGNAL('triggered()'), self, SLOT('add_new_account_action()')
+      connect @ui.compose_widget, SIGNAL('publish_tweet(QString, QString)'), self, SLOT('publish_tweet(QString, QString)')
     end
+
+    private
 
     def load_accounts
       Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users LIMIT 1;' do |row|
@@ -50,6 +53,10 @@ module Twitrrerr
           @ui.compose_widget.ui.qcb_account.addItem row[0]
         end
       end
+    end
+
+    def publish_tweet(screen_name, tweet_text)
+      @accounts[screen_name][:client].update tweet_text
     end
   end
 end
