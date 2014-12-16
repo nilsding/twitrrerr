@@ -1,6 +1,8 @@
 require 'twitrrerr/helpers'
 require 'twitrrerr/addnewaccountdialog'
 
+require 'twitrrerr/ui/mainwindow'
+
 module Twitrrerr
   # The main window of Twitrrerr.
   class MainWindow < Qt::MainWindow
@@ -12,10 +14,11 @@ module Twitrrerr
 
     def initialize(parent = nil)
       super
+      @ui = Ui::MainWindow.new
+      @ui.setupUi self
       setWindowTitle "Twitrrerr #{Twitrrerr::VERSION}"
       @accounts = {}
       create_actions
-      create_menus
       load_accounts
     end
 
@@ -32,8 +35,7 @@ module Twitrrerr
     end
 
     def create_actions
-      @action_add_new_account = Qt::Action.new tr('Add &new account...'), self
-      connect @action_add_new_account, SIGNAL('triggered()'), self, SLOT('add_new_account_action()')
+      connect @ui.action_add_new_account, SIGNAL('triggered()'), self, SLOT('add_new_account_action()')
     end
 
     def load_accounts
@@ -43,11 +45,6 @@ module Twitrrerr
             streamer: new_streamer(row[1], row[2])
         } unless @accounts.include? row[0]
       end
-    end
-
-    def create_menus
-      @menu_accounts = menuBar().addMenu(tr('&Accounts'))
-      @menu_accounts.addAction @action_add_new_account
     end
   end
 end
