@@ -1,4 +1,4 @@
-require 'twitrrerr/ui/composewidget'
+require 'twitrrerr/ui/compose_widget'
 
 module Twitrrerr
   # Compose tweet widget.

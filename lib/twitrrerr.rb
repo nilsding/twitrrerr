@@ -4,7 +4,7 @@ require 'launchy'
 
 require 'configuration'
 require 'twitrrerr/database'
-require 'twitrrerr/mainwindow'
+require 'twitrrerr/main_window'
 
 # Twitrrerr Twitter client.
 module Twitrrerr

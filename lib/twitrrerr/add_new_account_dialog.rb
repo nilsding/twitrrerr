@@ -1,4 +1,4 @@
-require 'twitrrerr/ui/addnewaccountdialog'
+require 'twitrrerr/ui/add_new_account_dialog'
 require 'oauth'
 
 module Twitrrerr

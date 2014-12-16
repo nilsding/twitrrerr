@@ -1,9 +1,9 @@
 require 'twitrrerr/helpers'
-require 'twitrrerr/addnewaccountdialog'
+require 'twitrrerr/add_new_account_dialog'
 
-require 'twitrrerr/composewidget'
+require 'twitrrerr/compose_widget'
 
-require 'twitrrerr/ui/mainwindow'
+require 'twitrrerr/ui/main_window'
 
 module Twitrrerr
   # The main window of Twitrrerr.
