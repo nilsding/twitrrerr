@@ -1,8 +1,11 @@
 require 'sqlite3'
 
 module Twitrrerr
+  # Provides a SQLite3 database connection.
   class Database
+    # Path to the database file.
     DATABASE_FILE = File.expand_path('twitrrerr.db', Twitrrerr::CONFIG_PATH)
+
     class << self
       attr_reader :db
 

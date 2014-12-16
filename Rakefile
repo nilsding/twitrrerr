@@ -11,5 +11,5 @@ rule ".rb" => ".ui" do |t|
 end
 
 YARD::Rake::YardocTask.new do |t|
-  t.files = %w(lib/**/*.rb - *.md LICENSE)
+  t.files = %w(lib/*.rb lib/twitrrerr/*.rb - *.md LICENSE)
 end

@@ -6,6 +6,7 @@ require 'configuration'
 require 'twitrrerr/database'
 require 'twitrrerr/mainwindow'
 
+# Twitrrerr Twitter client.
 module Twitrrerr
   # Runs the Qt application.
   def self.run!

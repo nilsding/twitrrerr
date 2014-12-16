@@ -2,6 +2,7 @@ require 'twitrrerr/ui/addnewaccountdialog'
 require 'oauth'
 
 module Twitrrerr
+  # OAuth pin auth dialog.
   class AddNewAccountDialog < Qt::Dialog
     slots 'accept()', 'reject()'
     signals 'newUser(QString, QString, QString)'

@@ -2,6 +2,7 @@ require 'twitrrerr/helpers'
 require 'twitrrerr/addnewaccountdialog'
 
 module Twitrrerr
+  # The main window of Twitrrerr.
   class MainWindow < Qt::MainWindow
     include Twitrrerr::Helpers
 
