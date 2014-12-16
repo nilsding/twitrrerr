@@ -1,12 +1,18 @@
+require 'twitrrerr/helpers'
 require 'twitrrerr/addnewaccountdialog'
 
 module Twitrrerr
   class MainWindow < Qt::MainWindow
+    include Twitrrerr::Helpers
+
     slots 'add_new_account_action()', 'new_account_added(QString, QString, QString)'
+
+    attr_accessor :accounts
 
     def initialize(parent = nil)
       super
       setWindowTitle "Twitrrerr #{Twitrrerr::VERSION}"
+      @accounts = {}
       create_actions
       create_menus
       load_accounts
@@ -15,6 +21,7 @@ module Twitrrerr
     def new_account_added(screen_name, access_token, access_token_secret)
       Database.db.execute 'INSERT INTO users (screen_name, access_token, access_secret) VALUES (?, ?, ?);',
                           [screen_name, access_token, access_token_secret]
+      load_accounts
     end
 
     def add_new_account_action
@@ -29,8 +36,11 @@ module Twitrrerr
     end
 
     def load_accounts
-      Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users;' do |row|
-        # TODO
+      Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users LIMIT 1;' do |row|
+        @accounts[row[0]] = {
+            client: new_rest_client(row[1], row[2]),
+            streamer: new_streamer(row[1], row[2])
+        } unless @accounts.include? row[0]
       end
     end
 
