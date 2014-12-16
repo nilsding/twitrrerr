@@ -1,6 +1,8 @@
 require 'twitrrerr/helpers'
 require 'twitrrerr/addnewaccountdialog'
 
+require 'twitrrerr/composewidget'
+
 require 'twitrrerr/ui/mainwindow'
 
 module Twitrrerr
@@ -40,10 +42,13 @@ module Twitrrerr
 
     def load_accounts
       Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users LIMIT 1;' do |row|
-        @accounts[row[0]] = {
-            client: new_rest_client(row[1], row[2]),
-            streamer: new_streamer(row[1], row[2])
-        } unless @accounts.include? row[0]
+        unless @accounts.include? row[0]
+          @accounts[row[0]] = {
+              client: new_rest_client(row[1], row[2]),
+              streamer: new_streamer(row[1], row[2])
+          }
+          @ui.compose_widget.ui.qcb_account.addItem row[0]
+        end
       end
     end
   end
