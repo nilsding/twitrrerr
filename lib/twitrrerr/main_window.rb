@@ -1,7 +1,8 @@
 require 'twitrrerr/helpers'
 require 'twitrrerr/add_new_account_dialog'
-
 require 'twitrrerr/compose_widget'
+require 'twitrrerr/timeline'
+require 'twitrrerr/tweet'
 
 require 'twitrrerr/ui/main_window'
 
@@ -11,6 +12,7 @@ module Twitrrerr
     include Twitrrerr::Helpers
 
     slots 'add_new_account_action()', 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)'
+    signals 'new_tweet(QVariant)'
 
     attr_accessor :accounts
 
@@ -20,6 +22,12 @@ module Twitrrerr
       @ui.setupUi self
       setWindowTitle "Twitrrerr #{Twitrrerr::VERSION}"
       @accounts = {}
+      @timelines = {}
+      @timelines_view = Qt::HBoxLayout.new @ui.qsa_timelines_content do |obj|
+        obj.setObjectName 'timelines_view'
+        obj.setSizeConstraint Qt::Layout::SetNoConstraint
+        obj.setContentsMargins 0, 0, 0, 0
+      end
       connect_actions
       load_accounts
     end
@@ -43,6 +51,8 @@ module Twitrrerr
 
     private
 
+    :timelines
+
     def load_accounts
       Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users LIMIT 1;' do |row|
         unless @accounts.include? row[0]
@@ -51,12 +61,51 @@ module Twitrrerr
               streamer: new_streamer(row[1], row[2])
           }
           @ui.compose_widget.ui.qcb_account.addItem row[0]
+          open_timelines row[0]
+          init_stream row[0]
         end
       end
     end
 
     def publish_tweet(screen_name, tweet_text)
       @accounts[screen_name][:client].update tweet_text
+    end
+
+    def open_timelines(screen_name)
+      @timelines[:"home_#{screen_name}"] = Timeline.new("#{tr("Home timeline")} (#{screen_name})")
+      connect self, SIGNAL('new_tweet(QVariant)'), @timelines[:"home_#{screen_name}"], SLOT('new_tweet(QVariant)')
+      @timelines_view.addWidget @timelines[:"home_#{screen_name}"]
+    end
+
+    def init_stream(screen_name)
+      Thread.new do
+        begin
+          @accounts[screen_name][:streamer].user do |object|
+            handle_tweet screen_name, object
+          end
+        rescue => e
+          puts "err: #{e.message}"
+        end
+      end
+    end
+
+    def handle_tweet(screen_name, object)
+      case object
+        when Twitter::Tweet
+          puts "tweet GET"
+          emit new_tweet(object.to_variant)
+        when Twitter::DirectMessage
+          puts "direct message GET"
+        when Twitter::Streaming::DeletedTweet
+          puts "deleted tweet GET"
+        when Twitter::Streaming::Event
+          puts "event GET"
+        when Twitter::Streaming::FriendList
+          puts "friendlist GET"
+        when Twitter::Streaming::StallWarning
+        else
+          puts "warn: unknown object #{object.class.to_s}"
+      end
     end
   end
 end

@@ -32,11 +32,11 @@
      </widget>
     </item>
     <item>
-     <widget class="QScrollArea" name="scrollArea">
+     <widget class="QScrollArea" name="qsa_timelines">
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
+      <widget class="QWidget" name="qsa_timelines_content">
        <property name="geometry">
         <rect>
          <x>0</x>
