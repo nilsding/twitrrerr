@@ -11,10 +11,12 @@ module Twitrrerr
   class MainWindow < Qt::MainWindow
     include Twitrrerr::Helpers
 
-    slots 'add_new_account_action()', 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)'
-    signals 'new_tweet(QVariant)'
+    slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)'
+    signals 'new_tweet(QString, QVariant, QVariant)'
+    private_slots 'add_new_account_action()'
 
     attr_accessor :accounts
+    attr_reader :timelines
 
     def initialize(parent = nil)
       super
@@ -54,11 +56,13 @@ module Twitrrerr
     :timelines
 
     def load_accounts
-      Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users LIMIT 1;' do |row|
+      Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users;' do |row|
+        puts "load_accounts: #{row[0]}"
         unless @accounts.include? row[0]
           @accounts[row[0]] = {
               client: new_rest_client(row[1], row[2]),
-              streamer: new_streamer(row[1], row[2])
+              streamer: new_streamer(row[1], row[2]),
+              stream_thread: nil
           }
           @ui.compose_widget.ui.qcb_account.addItem row[0]
           open_timelines row[0]
@@ -72,28 +76,29 @@ module Twitrrerr
     end
 
     def open_timelines(screen_name)
-      @timelines[:"home_#{screen_name}"] = Timeline.new("#{tr("Home timeline")} (#{screen_name})")
-      connect self, SIGNAL('new_tweet(QVariant)'), @timelines[:"home_#{screen_name}"], SLOT('new_tweet(QVariant)')
+      @timelines[:"home_#{screen_name}"] = Timeline.new(:home, screen_name)
+      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"home_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
       @timelines_view.addWidget @timelines[:"home_#{screen_name}"]
     end
 
     def init_stream(screen_name)
-      Thread.new do
+      @accounts[screen_name][:stream_thread] = Thread.new do
         begin
           @accounts[screen_name][:streamer].user do |object|
             handle_tweet screen_name, object
           end
         rescue => e
           puts "err: #{e.message}"
+          @accounts[screen_name][:stream_thread] = nil
         end
-      end
+      end if @accounts[screen_name][:stream_thread].nil?
     end
 
     def handle_tweet(screen_name, object)
       case object
         when Twitter::Tweet
           puts "tweet GET"
-          emit new_tweet(object.to_variant)
+          emit new_tweet(screen_name, :home.to_variant, object.to_variant)
         when Twitter::DirectMessage
           puts "direct message GET"
         when Twitter::Streaming::DeletedTweet
