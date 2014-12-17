@@ -16,7 +16,7 @@ module Twitrrerr
       @ui.setupUi self
       @tweet = tweet
       @ui.ql_screen_name.text = tweet.user.screen_name
-      @ui.ql_timestamp.text = tweet.created_at.strftime '%H:%m'
+      @ui.ql_timestamp.text = tweet.created_at.strftime '%H:%M'
       @ui.ql_tweet_text.text = tweet.text
     end
   end
