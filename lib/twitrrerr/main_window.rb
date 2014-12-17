@@ -65,7 +65,7 @@ module Twitrrerr
               stream_thread: nil
           }
           @ui.compose_widget.ui.qcb_account.addItem row[0]
-          open_timelines row[0]
+          open_timelines row[0], true
           init_stream row[0]
         end
       end
@@ -78,10 +78,17 @@ module Twitrrerr
       Qt::MessageBox.critical self, tr("An error occurred"), e.message
     end
 
-    def open_timelines(screen_name)
+    def open_timelines(screen_name, preload = false)
       @timelines[:"home_#{screen_name}"] = Timeline.new(:home, screen_name)
       connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"home_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
       @timelines_view.addWidget @timelines[:"home_#{screen_name}"]
+
+      if preload
+        puts "Preloading tweets for user #{screen_name}... please wait"
+        @accounts[screen_name][:client].home_timeline.each do |object|
+          emit new_tweet(screen_name, :home.to_variant, object.to_variant)
+        end
+      end
     end
 
     def init_stream(screen_name)
