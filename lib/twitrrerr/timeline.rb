@@ -17,7 +17,7 @@ module Twitrrerr
       @tweets = {}
       @tweets_view = Qt::VBoxLayout.new @ui.qsa_tweets_content do |obj|
         obj.setObjectName 'tweets_view'
-        obj.setSizeConstraint Qt::Layout::SetNoConstraint
+        obj.setSizeConstraint Qt::Layout::SetMinimumSize
         obj.setContentsMargins 0, 0, 0, 0
       end
     end
