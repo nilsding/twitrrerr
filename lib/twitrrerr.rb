@@ -2,6 +2,8 @@ require 'Qt'
 require 'twitter'
 require 'launchy'
 
+require 'ext/qvariant'
+
 require 'configuration'
 require 'twitrrerr/database'
 require 'twitrrerr/main_window'
