@@ -10,4 +10,7 @@ module Twitrrerr
       consumer_key: 'SNbZ3xndTrT5DLxf1N29Ujne1',
       consumer_secret: 'n1VHxFbP3F4UlLmu81RbpaKf4iRtpwEV5Efb3FOWUgrneO8unQ'
   }
+
+  # Length of shortened urls
+  SHORTENED_URL_LENGTH = 22
 end
