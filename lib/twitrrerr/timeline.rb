@@ -4,7 +4,7 @@ module Twitrrerr
   # Timeline widget.
   class Timeline < Qt::Widget
 
-    slots 'new_tweet(QString, QVariant, QVariant, QString)'
+    slots 'new_tweet(QString, QString, QVariant, QString)'
     signals 'tweet_added(QWidget*)'
 
     attr_reader :ui
@@ -31,7 +31,7 @@ module Twitrrerr
     end
 
     def new_tweet(screen_name, timeline_type, tweet, user_name)
-      return if screen_name != @screen_name or timeline_type.to_object != @timeline_type
+      return if screen_name != @screen_name or timeline_type.to_sym != @timeline_type
       return if @timeline_type == :user and user_name != @options[:target_screen_name]
 
       tweet = tweet.to_object

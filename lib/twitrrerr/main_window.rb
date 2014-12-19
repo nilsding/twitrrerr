@@ -12,7 +12,7 @@ module Twitrrerr
     include Twitrrerr::Helpers
 
     slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)', 'tweet_added(QWidget*)'
-    signals 'new_tweet(QString, QVariant, QVariant, QString)'
+    signals 'new_tweet(QString, QString, QVariant, QString)'
     private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)'
 
     attr_accessor :accounts
@@ -67,7 +67,9 @@ module Twitrrerr
               stream_thread: nil
           }
           @ui.compose_widget.ui.qcb_account.addItem row[0]
-          open_timelines row[0], true
+          Qt::execute_in_main_thread(false) do
+            open_timelines row[0], true
+          end
           init_stream row[0]
         end
       end
@@ -94,21 +96,24 @@ module Twitrrerr
       end
     end
 
-    def init_stream(screen_name, retries = 0)
+    def init_stream(screen_name)
       @accounts[screen_name][:stream_thread] = Thread.new do
+        retries = 0
         begin
           @accounts[screen_name][:streamer].user do |object|
             handle_tweet screen_name, object
           end
         rescue => e
           puts "err: #{e.message}"
+          puts e.backtrace.join '\n'
+
           @accounts[screen_name][:stream_thread] = nil
 
           if retries < Twitrrerr::MAX_RETRIES
             retries += 1
             puts "stream for #{screen_name} died unexpectedly, reconnecting in #{5 * retries} seconds..."
             sleep 5 * retries
-            init_stream(screen_name, retries)
+            retry
           else
             puts "Too many retries, aborting!"# + "  Kill me with SIGUSR1 to force reconnection of all streams."
           end
@@ -119,8 +124,8 @@ module Twitrrerr
     def handle_tweet(screen_name, object)
       case object
         when Twitter::Tweet
-          emit new_tweet(screen_name, :home.to_variant, object.to_variant, '')
-          emit new_tweet(screen_name, :mentions.to_variant, object.to_variant, '') if object.text.include? "@#{screen_name}"
+          emit new_tweet(screen_name, :home.to_s, object.to_variant, '')
+          emit new_tweet(screen_name, :mentions.to_s, object.to_variant, '') if object.text.include? "@#{screen_name}"
         when Twitter::DirectMessage
           puts "direct message GET"
         when Twitter::Streaming::DeletedTweet
@@ -152,7 +157,7 @@ module Twitrrerr
       }.merge(options)
 
       @timelines[:"#{type}_#{screen_name}"] = Timeline.new(screen_name, type, nil, options)
-      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant, QString)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant, QString)')
+      connect self, SIGNAL('new_tweet(QString, QString, QVariant, QString)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QString, QVariant, QString)')
       connect @timelines[:"#{type}_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
       @timelines_view.addWidget @timelines[:"#{type}_#{screen_name}"]
 
@@ -164,7 +169,7 @@ module Twitrrerr
           else
             @accounts[screen_name][:client].send("#{type}_timeline").reverse
           end.each do |object|
-            emit new_tweet(screen_name, type.to_variant, object.to_variant, (type == :user ? options[:target_screen_name] : ''))
+            emit new_tweet(screen_name, type.to_s, object.to_variant, (type == :user ? options[:target_screen_name] : ''))
           end
         rescue => e
           @timelines_view.removeWidget @timelines[:"#{type}_#{screen_name}"]
