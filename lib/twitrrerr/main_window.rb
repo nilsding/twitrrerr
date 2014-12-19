@@ -59,6 +59,7 @@ module Twitrrerr
           init_stream row[0]
         end
       end
+      open_timeline 'nilsding', :user, target_screen_name: 'bad_dragon'
     end
 
     def publish_tweet(screen_name, tweet_text)
@@ -78,7 +79,7 @@ module Twitrrerr
 
     def open_timelines(screen_name, preload = false)
       %i{home mentions}.each do |type|
-        open_timeline(screen_name, preload, type)
+        open_timeline(screen_name, type, preload: preload)
       end
     end
 
@@ -119,6 +120,34 @@ module Twitrrerr
       connect tweet_widget, SIGNAL('retweet_clicked(QVariant)'), self, SLOT('retweet(QVariant)')
     end
 
+    # Opens a new {Twitrrerr::Timeline} for the given user.
+    # @param type [Symbol] Timeline type.
+    # @param options [Hash] A customizable set of options.
+    # @option options [String] :target_screen_name the target user's (i.e. view profile) screen name
+    # @option options [Boolean] :preload preload the timeline
+    def open_timeline(screen_name, type = :user, options = {})
+      options = {
+          target_screen_name: nil,
+          preload: true
+      }.merge(options)
+
+      @timelines[:"#{type}_#{screen_name}"] = Timeline.new(screen_name, type, nil, options)
+      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
+      connect @timelines[:"#{type}_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
+      @timelines_view.addWidget @timelines[:"#{type}_#{screen_name}"]
+
+      if options[:preload]
+        puts "Preloading #{type}_timeline for user #{screen_name}... please wait"
+        if type == :user
+          @accounts[screen_name][:client].user_timeline(options[:target_screen_name]).reverse
+        else
+          @accounts[screen_name][:client].send("#{type}_timeline").reverse
+        end.each do |object|
+          emit new_tweet(screen_name, type.to_variant, object.to_variant)
+        end
+      end
+    end
+
     private
 
     :timelines
@@ -156,24 +185,6 @@ module Twitrrerr
       @ui.compose_widget.in_reply_to_id = tweet.id
       @ui.compose_widget.ui.qte_tweet.document.plainText = "RT @#{tweet.user.screen_name}: #{tweet.full_text}"
       @ui.compose_widget.retweet = true
-    end
-
-    def open_timeline(screen_name, preload, type = :user, options = {})
-      options = {
-          target_screen_name: nil
-      }.merge(options)
-
-      @timelines[:"#{type}_#{screen_name}"] = Timeline.new(type, screen_name)
-      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
-      connect @timelines[:"#{type}_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
-      @timelines_view.addWidget @timelines[:"#{type}_#{screen_name}"]
-
-      if preload
-        puts "Preloading #{type}_timeline for user #{screen_name}... please wait"
-        @accounts[screen_name][:client].send("#{type}_timeline").reverse.each do |object|
-          emit new_tweet(screen_name, type.to_variant, object.to_variant)
-        end
-      end
     end
   end
 end

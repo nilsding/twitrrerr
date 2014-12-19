@@ -10,12 +10,16 @@ module Twitrrerr
     attr_reader :ui
     attr_reader :tweets_view
 
-    # @param user_name [String] the target user's (i.e. view profile) screen name
-    def initialize(timeline_type, screen_name, parent = nil, user_name = '-- unknown --')
+    # @param options [Hash] A customizable set of options.
+    # @option options [String] :target_screen_name the target user's (i.e. view profile) screen name
+    def initialize(screen_name, timeline_type, parent = nil, options = {})
+      options = {
+          target_screen_name: 'E_UNKNOWN_USER'
+      }.merge(options)
       super parent
       @ui = Ui::Timeline.new
       @ui.setupUi self
-      @ui.ql_timeline_name.text = "#{get_timeline_name(timeline_type, user_name)} (#{screen_name})"
+      @ui.ql_timeline_name.text = "#{get_timeline_name(timeline_type, options[:target_screen_name])} (#{screen_name})"
       @tweets = {}
       @tweets_view = Qt::VBoxLayout.new @ui.qsa_tweets_content do |obj|
         obj.setObjectName 'tweets_view'
@@ -48,7 +52,7 @@ module Twitrrerr
         when :mentions
           tr('Mentions')
         when :user
-          user_name
+          tr('User: ') + user_name
         else
           tr('Unknown timeline')
         end
