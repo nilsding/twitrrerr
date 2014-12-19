@@ -164,7 +164,7 @@ module Twitrrerr
       @ui.compose_widget.in_reply_to_id = tweet.id
       @ui.compose_widget.retweet = false
 
-      users_string = "@#{users(tweet).join(" @")} "
+      users_string = "@#{users(@ui.compose_widget.ui.qcb_account.currentText, tweet).join(" @")} "
 
       text_cursor = @ui.compose_widget.ui.qte_tweet.textCursor
       current_pos = text_cursor.position

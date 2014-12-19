@@ -31,17 +31,19 @@ module Twitrrerr
     end
 
     # Scans a tweet for screen names.
+    # @param screen_name [String] The user's screen name (i.e. that one who clicked "Reply")
     # @param tweet [Twitter::Tweet]
     # @param reply_all [Boolean] Include all users in the reply.
     # @return [Array] An array of user names.
-    def users(tweet, reply_all = true)
+    def users(screen_name, tweet, reply_all = true)
       userlist = [ tweet.user.screen_name ]
       if reply_all
-        tweet.text.scan Twitrrerr::SCREEN_NAME_REGEX do |screen_name|
-          userlist << screen_name unless userlist.include? screen_name
+        tweet.text.scan Twitrrerr::SCREEN_NAME_REGEX do |user_name|
+          user_name = user_name[0]
+          userlist << user_name unless userlist.include?(user_name) or screen_name == user_name
         end
       end
-      userlist.flatten
+      userlist
     end
   end
 end
