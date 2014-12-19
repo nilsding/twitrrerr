@@ -45,6 +45,8 @@ module Twitrrerr
         case timeline_type
         when :home
           tr('Home timeline')
+        when :mentions
+          tr('Mentions')
         when :user
           user_name
         else

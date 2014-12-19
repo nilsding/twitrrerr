@@ -72,15 +72,17 @@ module Twitrrerr
     end
 
     def open_timelines(screen_name, preload = false)
-      @timelines[:"home_#{screen_name}"] = Timeline.new(:home, screen_name)
-      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"home_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
-      connect @timelines[:"home_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
-      @timelines_view.addWidget @timelines[:"home_#{screen_name}"]
+      %i{home mentions}.each do |type|
+        @timelines[:"#{type}_#{screen_name}"] = Timeline.new(type, screen_name)
+        connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
+        connect @timelines[:"#{type}_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
+        @timelines_view.addWidget @timelines[:"#{type}_#{screen_name}"]
 
-      if preload
-        puts "Preloading tweets for user #{screen_name}... please wait"
-        @accounts[screen_name][:client].home_timeline.each do |object|
-          emit new_tweet(screen_name, :home.to_variant, object.to_variant)
+        if preload
+          puts "Preloading #{type}_timeline for user #{screen_name}... please wait"
+          @accounts[screen_name][:client].send("#{type}_timeline").reverse.each do |object|
+            emit new_tweet(screen_name, type.to_variant, object.to_variant)
+          end
         end
       end
     end
@@ -102,6 +104,7 @@ module Twitrrerr
       case object
         when Twitter::Tweet
           emit new_tweet(screen_name, :home.to_variant, object.to_variant)
+          emit new_tweet(screen_name, :mentions.to_variant, object.to_variant) if object.text.include? "@#{screen_name}"
         when Twitter::DirectMessage
           puts "direct message GET"
         when Twitter::Streaming::DeletedTweet
