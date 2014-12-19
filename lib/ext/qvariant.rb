@@ -8,5 +8,7 @@ end
 class Qt::Variant
   def to_object
     ObjectSpace._id2ref to_string.to_i
+  rescue RangeError
+    puts "Ruby used garbage collector!  It's very effective!"
   end
 end
