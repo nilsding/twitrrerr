@@ -59,7 +59,6 @@ module Twitrrerr
           init_stream row[0]
         end
       end
-      open_timeline 'nilsding', :user, target_screen_name: 'bad_dragon'
     end
 
     def publish_tweet(screen_name, tweet_text)
