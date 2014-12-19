@@ -16,4 +16,7 @@ module Twitrrerr
 
   # Regular expression to match Twitter screen names
   SCREEN_NAME_REGEX = /@([A-Za-z0-9_]{1,15})/
+
+  # How often Twitrrerr should try to reconnect to a stream
+  MAX_RETRIES = 10
 end

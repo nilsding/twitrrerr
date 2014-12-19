@@ -32,6 +32,17 @@ module Twitrrerr
       end
       connect_actions
       load_accounts
+
+      trap "USR1" do
+        puts "Trying to restart streams of all accounts"
+        @accounts.each do |k, v|
+          puts "Killing thread for #{k}..."
+          v[:stream_thread].kill
+          puts "Creating new thread for #{k}..."
+          init_stream(k)
+        end
+        puts "Done."
+      end
     end
 
     def new_account_added(screen_name, access_token, access_token_secret)
@@ -82,7 +93,7 @@ module Twitrrerr
       end
     end
 
-    def init_stream(screen_name)
+    def init_stream(screen_name, retries = 0)
       @accounts[screen_name][:stream_thread] = Thread.new do
         begin
           @accounts[screen_name][:streamer].user do |object|
@@ -91,6 +102,15 @@ module Twitrrerr
         rescue => e
           puts "err: #{e.message}"
           @accounts[screen_name][:stream_thread] = nil
+
+          if retries < Twitrrerr::MAX_RETRIES
+            retries += 1
+            puts "stream for #{screen_name} died unexpectedly, reconnecting in #{5 * retries} seconds..."
+            sleep 5 * retries
+            init_stream(screen_name, retries)
+          else
+            puts "Too many retries, aborting!"# + "  Kill me with SIGUSR1 to force reconnection of all streams."
+          end
         end
       end if @accounts[screen_name][:stream_thread].nil?
     end
