@@ -1,6 +1,8 @@
 require 'Qt'
 require 'twitter'
 require 'launchy'
+require 'fileutils'
+require 'httparty'
 
 require 'ext/qvariant'
 
@@ -12,7 +14,8 @@ require 'twitrrerr/main_window'
 module Twitrrerr
   # Runs the Qt application.
   def self.run!
-    create_config_dir
+    create_directory Twitrrerr::CONFIG_PATH
+    create_directory Twitrrerr::TEMP_PATH
     Database.init
 
     app = Qt::Application.new ARGV
@@ -28,12 +31,12 @@ module Twitrrerr
 
   private
 
-    # Creates the config directory.
-    def self.create_config_dir
-      if File.exists?(Twitrrerr::CONFIG_PATH) and !File.directory?(Twitrrerr::CONFIG_PATH)
-        raise "#{Twitrrerr::CONFIG_PATH} already exists and is not a directory!  Aborting."
-      elsif !File.exists?(Twitrrerr::CONFIG_PATH)
-        Dir.mkdir Twitrrerr::CONFIG_PATH
+    # Creates a directory if +dir_name+ does not already exist or is a file.
+    def self.create_directory(dir_name)
+      if File.exists?(dir_name) and !File.directory?(dir_name)
+        raise "#{dir_name} already exists and is not a directory!  Aborting."
+      elsif !File.exists?(dir_name)
+        Dir.mkdir dir_name
       end
     end
 end

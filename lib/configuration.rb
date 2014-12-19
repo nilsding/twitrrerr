@@ -5,6 +5,9 @@ module Twitrrerr
   # Path to the configuration directory
   CONFIG_PATH = File.expand_path('./.twitrrerr', Dir.home)
 
+  # Path to the temporary directory
+  TEMP_PATH = File.expand_path('tmp', Twitrrerr::CONFIG_PATH)
+
   # OAuth consumer keys
   OAUTH_KEYS = {
       consumer_key: 'SNbZ3xndTrT5DLxf1N29Ujne1',
