@@ -15,5 +15,5 @@ module Twitrrerr
   SHORTENED_URL_LENGTH = 22
 
   # Regular expression to match Twitter screen names
-  SCREEN_NAME_REGEX = /@[A-Za-z0-9_]{1,15}/
+  SCREEN_NAME_REGEX = /@([A-Za-z0-9_]{1,15})/
 end

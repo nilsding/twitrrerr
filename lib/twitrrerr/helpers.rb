@@ -29,5 +29,19 @@ module Twitrrerr
         config.access_token_secret = access_secret
       end
     end
+
+    # Scans a tweet for screen names.
+    # @param tweet [Twitter::Tweet]
+    # @param reply_all [Boolean] Include all users in the reply.
+    # @return [Array] An array of user names.
+    def users(tweet, reply_all = true)
+      userlist = [ tweet.user.screen_name ]
+      if reply_all
+        tweet.text.scan Twitrrerr::SCREEN_NAME_REGEX do |screen_name|
+          userlist << screen_name unless userlist.include? screen_name
+        end
+      end
+      userlist.flatten
+    end
   end
 end
