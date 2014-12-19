@@ -107,7 +107,6 @@ module Twitrrerr
     def handle_tweet(screen_name, object)
       case object
         when Twitter::Tweet
-          puts "tweet GET"
           emit new_tweet(screen_name, :home.to_variant, object.to_variant)
         when Twitter::DirectMessage
           puts "direct message GET"

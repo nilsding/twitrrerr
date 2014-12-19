@@ -28,6 +28,7 @@ module Twitrrerr
     def new_tweet(screen_name, timeline_type, tweet)
       return if screen_name != @screen_name or timeline_type.to_object != @timeline_type
       tweet = tweet.to_object
+      return unless tweet.is_a? Twitter::Tweet
       @tweets[:"#{tweet.id}"] = tweet
       @tweets_view.insertWidget 0, Twitrrerr::Tweet.new(tweet)
     end
