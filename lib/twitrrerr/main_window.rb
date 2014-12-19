@@ -72,8 +72,10 @@ module Twitrrerr
     end
 
     def publish_tweet(screen_name, tweet_text)
-      @accounts[screen_name][:client].update tweet_text
-      @ui.compose_widget.ui.qte_tweet.text = ''
+      @accounts[screen_name][:client].update! tweet_text
+      @ui.compose_widget.ui.qte_tweet.document.clear
+    rescue Twitter::Error::DuplicateStatus
+      Qt::MessageBox.warning self, tr("An error occurred"), tr('Status is a duplicate')
     rescue => e
       Qt::MessageBox.critical self, tr("An error occurred"), e.message
     end
