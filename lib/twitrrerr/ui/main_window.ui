@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>590</width>
-    <height>377</height>
+    <width>800</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,8 +47,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>582</width>
-         <height>264</height>
+         <width>792</width>
+         <height>367</height>
         </rect>
        </property>
       </widget>
@@ -61,7 +61,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>590</width>
+     <width>800</width>
      <height>21</height>
     </rect>
    </property>
@@ -77,11 +77,31 @@
     </widget>
     <addaction name="menu_accounts"/>
    </widget>
+   <widget class="QMenu" name="menu_view">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="action_go_to_user"/>
+   </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu_view"/>
   </widget>
   <action name="action_add_new_account">
    <property name="text">
     <string>Add &amp;new account…</string>
+   </property>
+  </action>
+  <action name="action_go_to_user">
+   <property name="text">
+    <string>&amp;Go to user…</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="action_Quit">
+   <property name="text">
+    <string>&amp;Quit</string>
    </property>
   </action>
  </widget>

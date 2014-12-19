@@ -12,8 +12,8 @@ module Twitrrerr
     include Twitrrerr::Helpers
 
     slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)', 'tweet_added(QWidget*)'
-    signals 'new_tweet(QString, QVariant, QVariant)'
-    private_slots 'add_new_account_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)'
+    signals 'new_tweet(QString, QVariant, QVariant, QString)'
+    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)'
 
     attr_accessor :accounts
     attr_reader :timelines
@@ -53,6 +53,7 @@ module Twitrrerr
 
     def connect_actions
       connect @ui.action_add_new_account, SIGNAL('triggered()'), self, SLOT('add_new_account_action()')
+      connect @ui.action_go_to_user, SIGNAL('triggered()'), self, SLOT('open_user_profile_action()')
       connect @ui.compose_widget, SIGNAL('publish_tweet(QString, QString)'), self, SLOT('publish_tweet(QString, QString)')
     end
 
@@ -118,8 +119,8 @@ module Twitrrerr
     def handle_tweet(screen_name, object)
       case object
         when Twitter::Tweet
-          emit new_tweet(screen_name, :home.to_variant, object.to_variant)
-          emit new_tweet(screen_name, :mentions.to_variant, object.to_variant) if object.text.include? "@#{screen_name}"
+          emit new_tweet(screen_name, :home.to_variant, object.to_variant, '')
+          emit new_tweet(screen_name, :mentions.to_variant, object.to_variant, '') if object.text.include? "@#{screen_name}"
         when Twitter::DirectMessage
           puts "direct message GET"
         when Twitter::Streaming::DeletedTweet
@@ -151,7 +152,7 @@ module Twitrrerr
       }.merge(options)
 
       @timelines[:"#{type}_#{screen_name}"] = Timeline.new(screen_name, type, nil, options)
-      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
+      connect self, SIGNAL('new_tweet(QString, QVariant, QVariant, QString)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant, QString)')
       connect @timelines[:"#{type}_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
       @timelines_view.addWidget @timelines[:"#{type}_#{screen_name}"]
 
@@ -162,7 +163,7 @@ module Twitrrerr
         else
           @accounts[screen_name][:client].send("#{type}_timeline").reverse
         end.each do |object|
-          emit new_tweet(screen_name, type.to_variant, object.to_variant)
+          emit new_tweet(screen_name, type.to_variant, object.to_variant, (type == :user ? options[:target_screen_name] : ''))
         end
       end
     end
@@ -175,6 +176,14 @@ module Twitrrerr
       dlg = AddNewAccountDialog.new self
       connect dlg, SIGNAL('newUser(QString, QString, QString)'), self, SLOT('new_account_added(QString, QString, QString)')
       dlg.show
+    end
+
+    def open_user_profile_action
+      user_name = Qt::InputDialog.getText self, tr("Go to user"), tr("Enter an username")
+      unless user_name.nil?
+        user_name.strip!
+        open_timeline @ui.compose_widget.ui.qcb_account.currentText, :user, target_screen_name: user_name
+      end
     end
 
     def reply_to_tweet(tweet)

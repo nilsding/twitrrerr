@@ -4,7 +4,7 @@ module Twitrrerr
   # Timeline widget.
   class Timeline < Qt::Widget
 
-    slots 'new_tweet(QString, QVariant, QVariant)'
+    slots 'new_tweet(QString, QVariant, QVariant, QString)'
     signals 'tweet_added(QWidget*)'
 
     attr_reader :ui
@@ -13,13 +13,13 @@ module Twitrrerr
     # @param options [Hash] A customizable set of options.
     # @option options [String] :target_screen_name the target user's (i.e. view profile) screen name
     def initialize(screen_name, timeline_type, parent = nil, options = {})
-      options = {
-          target_screen_name: 'E_UNKNOWN_USER'
+      @options = {
+          target_screen_name: ''
       }.merge(options)
       super parent
       @ui = Ui::Timeline.new
       @ui.setupUi self
-      @ui.ql_timeline_name.text = "#{get_timeline_name(timeline_type, options[:target_screen_name])} (#{screen_name})"
+      @ui.ql_timeline_name.text = "#{get_timeline_name(timeline_type, @options[:target_screen_name])} (#{screen_name})"
       @tweets = {}
       @tweets_view = Qt::VBoxLayout.new @ui.qsa_tweets_content do |obj|
         obj.setObjectName 'tweets_view'
@@ -30,8 +30,9 @@ module Twitrrerr
       @screen_name = screen_name
     end
 
-    def new_tweet(screen_name, timeline_type, tweet)
+    def new_tweet(screen_name, timeline_type, tweet, user_name)
       return if screen_name != @screen_name or timeline_type.to_object != @timeline_type
+      return if @timeline_type == :user and user_name != @options[:target_screen_name]
 
       tweet = tweet.to_object
       return unless tweet.is_a? Twitter::Tweet
