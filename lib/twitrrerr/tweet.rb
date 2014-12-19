@@ -6,8 +6,8 @@ module Twitrrerr
   # Tweet widget.
   class Tweet < Qt::Widget
 
-    signals('reply_clicked(QVariant)')
-    private_slots('qpb_reply_clicked()')
+    signals 'reply_clicked(QVariant)', 'retweet_clicked(QVariant)'
+    private_slots 'qpb_reply_clicked()', 'qpb_retweet_clicked()'
 
     attr_reader :ui
     attr_reader :tweet
@@ -19,6 +19,7 @@ module Twitrrerr
       @ui.setupUi self
 
       connect @ui.qpb_reply, SIGNAL('clicked()'), self, SLOT('qpb_reply_clicked()')
+      connect @ui.qpb_retweet, SIGNAL('clicked()'), self, SLOT('qpb_retweet_clicked()')
 
       @tweet = tweet
       @ui.ql_screen_name.text = tweet.user.screen_name
@@ -31,6 +32,10 @@ module Twitrrerr
 
     def qpb_reply_clicked()
       emit reply_clicked(@tweet.to_variant)
+    end
+
+    def qpb_retweet_clicked()
+      emit retweet_clicked(@tweet.to_variant)
     end
 
   end

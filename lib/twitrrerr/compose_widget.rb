@@ -11,6 +11,7 @@ module Twitrrerr
 
     attr_reader :ui
     attr_accessor :in_reply_to_id
+    attr_accessor :retweet
 
     def initialize(parent = nil)
       super parent
@@ -18,6 +19,7 @@ module Twitrrerr
       @ui.setupUi self
 
       @in_reply_to_id = nil
+      @retweet = false
 
       connect @ui.qpb_send, SIGNAL('clicked()'), self, SLOT('qpb_send_clicked()')
       connect @ui.qte_tweet, SIGNAL('textChanged()'), self, SLOT('qte_tweet_text_changed()')
@@ -35,6 +37,7 @@ module Twitrrerr
     def qte_tweet_text_changed
       tweet_text = @ui.qte_tweet.document.toPlainText
       @ui.ql_chars.text = 140 - get_real_length(tweet_text)
+      @retweet = false if @retweet
     end
 
     # @param tweet_text [String]
