@@ -11,9 +11,9 @@ module Twitrrerr
   class MainWindow < Qt::MainWindow
     include Twitrrerr::Helpers
 
-    slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)'
+    slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)', 'tweet_added(QWidget*)'
     signals 'new_tweet(QString, QVariant, QVariant)'
-    private_slots 'add_new_account_action()'
+    private_slots 'add_new_account_action()', 'reply_to_tweet(QVariant)'
 
     attr_accessor :accounts
     attr_reader :timelines
@@ -40,20 +40,10 @@ module Twitrrerr
       load_accounts
     end
 
-    def add_new_account_action
-      dlg = AddNewAccountDialog.new self
-      connect dlg, SIGNAL('newUser(QString, QString, QString)'), self, SLOT('new_account_added(QString, QString, QString)')
-      dlg.show
-    end
-
     def connect_actions
       connect @ui.action_add_new_account, SIGNAL('triggered()'), self, SLOT('add_new_account_action()')
       connect @ui.compose_widget, SIGNAL('publish_tweet(QString, QString)'), self, SLOT('publish_tweet(QString, QString)')
     end
-
-    private
-
-    :timelines
 
     def load_accounts
       Database.db.execute 'SELECT screen_name, access_token, access_secret FROM users;' do |row|
@@ -72,8 +62,9 @@ module Twitrrerr
     end
 
     def publish_tweet(screen_name, tweet_text)
-      @accounts[screen_name][:client].update! tweet_text
+      @accounts[screen_name][:client].update! tweet_text, in_reply_to_status_id: @ui.compose_widget.in_reply_to_id
       @ui.compose_widget.ui.qte_tweet.document.clear
+      @ui.compose_widget.in_reply_to_id = nil
     rescue Twitter::Error::DuplicateStatus
       Qt::MessageBox.warning self, tr("An error occurred"), tr('Status is a duplicate')
     rescue => e
@@ -83,6 +74,7 @@ module Twitrrerr
     def open_timelines(screen_name, preload = false)
       @timelines[:"home_#{screen_name}"] = Timeline.new(:home, screen_name)
       connect self, SIGNAL('new_tweet(QString, QVariant, QVariant)'), @timelines[:"home_#{screen_name}"], SLOT('new_tweet(QString, QVariant, QVariant)')
+      connect @timelines[:"home_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
       @timelines_view.addWidget @timelines[:"home_#{screen_name}"]
 
       if preload
@@ -122,6 +114,39 @@ module Twitrrerr
         else
           puts "warn: unknown object #{object.class.to_s}"
       end
+    end
+
+    def tweet_added(tweet_widget)
+      connect tweet_widget, SIGNAL('reply_clicked(QVariant)'), self, SLOT('reply_to_tweet(QVariant)')
+    end
+
+    private
+
+    :timelines
+
+    def add_new_account_action
+      dlg = AddNewAccountDialog.new self
+      connect dlg, SIGNAL('newUser(QString, QString, QString)'), self, SLOT('new_account_added(QString, QString, QString)')
+      dlg.show
+    end
+
+    def reply_to_tweet(tweet)
+      tweet = tweet.to_object
+      return unless tweet.is_a? Twitter::Tweet
+
+      @ui.compose_widget.in_reply_to_id = tweet.id
+
+      users_string = "@#{users(tweet).join(" @")} "
+
+      text_cursor = @ui.compose_widget.ui.qte_tweet.textCursor
+      current_pos = text_cursor.position
+      text_cursor.position = 0
+      @ui.compose_widget.ui.qte_tweet.textCursor = text_cursor
+
+      @ui.compose_widget.ui.qte_tweet.insertPlainText users_string
+
+      text_cursor.position = current_pos + users_string.length
+      @ui.compose_widget.ui.qte_tweet.textCursor = text_cursor
     end
   end
 end

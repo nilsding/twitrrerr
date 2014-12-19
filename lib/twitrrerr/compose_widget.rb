@@ -10,11 +10,14 @@ module Twitrrerr
     private_slots 'qpb_send_clicked()', 'qte_tweet_text_changed()'
 
     attr_reader :ui
+    attr_accessor :in_reply_to_id
 
     def initialize(parent = nil)
       super parent
       @ui = Ui::ComposeWidget.new
       @ui.setupUi self
+
+      @in_reply_to_id = nil
 
       connect @ui.qpb_send, SIGNAL('clicked()'), self, SLOT('qpb_send_clicked()')
       connect @ui.qte_tweet, SIGNAL('textChanged()'), self, SLOT('qte_tweet_text_changed()')
