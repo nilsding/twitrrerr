@@ -158,12 +158,19 @@ module Twitrrerr
 
       if options[:preload]
         puts "Preloading #{type}_timeline for user #{screen_name}... please wait"
-        if type == :user
-          @accounts[screen_name][:client].user_timeline(options[:target_screen_name]).reverse
-        else
-          @accounts[screen_name][:client].send("#{type}_timeline").reverse
-        end.each do |object|
-          emit new_tweet(screen_name, type.to_variant, object.to_variant, (type == :user ? options[:target_screen_name] : ''))
+        begin
+          if type == :user
+            @accounts[screen_name][:client].user_timeline(options[:target_screen_name]).reverse
+          else
+            @accounts[screen_name][:client].send("#{type}_timeline").reverse
+          end.each do |object|
+            emit new_tweet(screen_name, type.to_variant, object.to_variant, (type == :user ? options[:target_screen_name] : ''))
+          end
+        rescue => e
+          @timelines_view.removeWidget @timelines[:"#{type}_#{screen_name}"]
+          @timelines[:"#{type}_#{screen_name}"].dispose
+          @timelines.delete :"#{type}_#{screen_name}"
+          Qt::MessageBox.critical self, tr("An error occurred"), e.message
         end
       end
     end
