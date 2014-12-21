@@ -6,8 +6,8 @@ module Twitrrerr
   # Tweet widget.
   class Tweet < Qt::Widget
 
-    signals 'reply_clicked(QVariant)', 'retweet_clicked(QVariant)', 'avatar_loaded(QString)'
-    private_slots 'qpb_reply_clicked()', 'qpb_retweet_clicked()', 'avatar_loaded(QString)'
+    signals 'reply_clicked(QVariant)', 'retweet_clicked(QVariant)', 'favourite_clicked(QVariant)', 'avatar_loaded(QString)'
+    private_slots 'qpb_reply_clicked()', 'qpb_retweet_clicked()', 'qpb_favourite_clicked()', 'avatar_loaded(QString)'
 
     attr_reader :ui
     attr_reader :tweet
@@ -20,6 +20,7 @@ module Twitrrerr
 
       connect @ui.qpb_reply, SIGNAL('clicked()'), self, SLOT('qpb_reply_clicked()')
       connect @ui.qpb_retweet, SIGNAL('clicked()'), self, SLOT('qpb_retweet_clicked()')
+      connect @ui.qpb_favourite, SIGNAL('clicked()'), self, SLOT('qpb_favourite_clicked()')
       connect self, SIGNAL('avatar_loaded(QString)'), self, SLOT('avatar_loaded(QString)')
 
       @tweet = tweet
@@ -40,6 +41,10 @@ module Twitrrerr
 
     def qpb_retweet_clicked()
       emit retweet_clicked(@tweet.to_variant)
+    end
+
+    def qpb_favourite_clicked()
+      emit favourite_clicked(@tweet.to_variant)
     end
 
     def avatar_loaded(file_name)

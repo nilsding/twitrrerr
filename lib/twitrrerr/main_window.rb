@@ -13,7 +13,7 @@ module Twitrrerr
 
     slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)', 'tweet_added(QWidget*)'
     signals 'new_tweet(QString, QString, QVariant, QString)'
-    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)'
+    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)', 'favourite(QVariant)'
 
     attr_accessor :accounts
     attr_reader :timelines
@@ -143,6 +143,7 @@ module Twitrrerr
     def tweet_added(tweet_widget)
       connect tweet_widget, SIGNAL('reply_clicked(QVariant)'), self, SLOT('reply_to_tweet(QVariant)')
       connect tweet_widget, SIGNAL('retweet_clicked(QVariant)'), self, SLOT('retweet(QVariant)')
+      connect tweet_widget, SIGNAL('favourite_clicked(QVariant)'), self, SLOT('favourite(QVariant)')
     end
 
     # Opens a new {Twitrrerr::Timeline} for the given user.
@@ -225,6 +226,15 @@ module Twitrrerr
       @ui.compose_widget.in_reply_to_id = tweet.id
       @ui.compose_widget.ui.qte_tweet.document.plainText = "RT @#{tweet.user.screen_name}: #{tweet.full_text}"
       @ui.compose_widget.retweet = true
+    end
+
+    def favourite(tweet)
+      tweet = tweet.to_object
+      return unless tweet.is_a? Twitter::Tweet
+
+      @accounts[@ui.compose_widget.ui.qcb_account.currentText][:client].favorite tweet.id
+    rescue => e
+      Qt::MessageBox.critical self, tr("An error occurred"), e.message
     end
   end
 end
