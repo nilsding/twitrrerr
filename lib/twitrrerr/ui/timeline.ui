@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
+    <width>325</width>
     <height>100</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>300</width>
+    <width>325</width>
     <height>100</height>
    </size>
   </property>
@@ -47,6 +47,15 @@
    </item>
    <item>
     <widget class="QScrollArea" name="qsa_tweets">
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
@@ -55,7 +64,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>294</width>
+        <width>303</width>
         <height>75</height>
        </rect>
       </property>
