@@ -1,0 +1,10 @@
+This directory contains tools for packaging Twitrrerr for different
+platforms.
+
+Windows requirements:
+
+  - Ruby 2.0 installed via RubyInstaller
+  - sh
+  - Ocra
+  - InnoSetup
+
