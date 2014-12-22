@@ -3,3 +3,5 @@
 .yardoc
 doc
 lib/twitrrerr/ui/*.rb
+Output
+*.iss
