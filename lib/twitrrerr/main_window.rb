@@ -49,7 +49,7 @@ module Twitrrerr
           init_stream(k)
         end
         puts "Done."
-      end
+      end unless Gem.win_platform?
     end
 
     def new_account_added(screen_name, access_token, access_token_secret)

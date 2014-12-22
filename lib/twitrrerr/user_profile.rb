@@ -47,7 +47,7 @@ class UserProfile < Qt::Widget
       @@mutex.synchronize do
         unless File.exists? file_name
           response = HTTParty.get @user.profile_image_uri
-          File.open file_name, 'w' do |f|
+          File.open file_name, 'wb' do |f|
             f.write response.body
           end
         end
