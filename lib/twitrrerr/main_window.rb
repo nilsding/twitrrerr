@@ -50,6 +50,8 @@ module Twitrrerr
         end
         puts "Done."
       end unless Gem.win_platform?
+
+      puts 'Enjoy!'
     end
 
     def new_account_added(screen_name, access_token, access_token_secret)

@@ -14,6 +14,13 @@ require 'twitrrerr/main_window'
 module Twitrrerr
   # Runs the Qt application.
   def self.run!
+    puts <<-END
+=============================
+ #{' ' * Twitrrerr::VERSION.length}Twitrrerr #{Twitrrerr::VERSION}
+ Copyright (c) 2014 nilsding
+=============================
+END
+
     create_directory Twitrrerr::CONFIG_PATH
     create_directory Twitrrerr::TEMP_PATH
     Database.init
