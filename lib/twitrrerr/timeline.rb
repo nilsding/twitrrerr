@@ -12,9 +12,11 @@ module Twitrrerr
 
     # @param options [Hash] A customizable set of options.
     # @option options [String] :target_screen_name the target user's (i.e. view profile) screen name
+    # @option options [Twitter::User] :user_obj User object
     def initialize(screen_name, timeline_type, parent = nil, options = {})
       @options = {
-          target_screen_name: ''
+          target_screen_name: '',
+          user_obj: nil
       }.merge(options)
       super parent
       @ui = Ui::Timeline.new
@@ -28,6 +30,12 @@ module Twitrrerr
       end
       @timeline_type = timeline_type
       @screen_name = screen_name
+
+      @user = options[:user_obj]
+      if timeline_type == :user and !@user.nil?
+        @user_widget = UserProfile.new(@user, options[:following])
+        @tweets_view.insertWidget 0, @user_widget
+      end
     end
 
     def new_tweet(screen_name, timeline_type, tweet, user_name)
@@ -39,7 +47,8 @@ module Twitrrerr
       @tweets[:"#{tweet.id}"] = tweet
 
       tweet_widget = Twitrrerr::Tweet.new(tweet)
-      @tweets_view.insertWidget 0, tweet_widget
+      insert_point = @timeline_type == :user ? 1 : 0
+      @tweets_view.insertWidget insert_point, tweet_widget
 
       emit tweet_added(tweet_widget)
     end

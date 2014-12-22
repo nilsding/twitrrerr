@@ -27,8 +27,8 @@ module Twitrrerr
       @ui.ql_screen_name.text = tweet.user.screen_name
       @ui.ql_timestamp.text = tweet.created_at.strftime '%H:%M'
       @ui.ql_tweet_text.text = tweet.full_text
-      @ui.ql_followers_count.text = tweet.user.followers_count
-      @ui.ql_friends_count.text = tweet.user.friends_count
+      @ui.ql_followers_count.text = hhh tweet.user.followers_count
+      @ui.ql_friends_count.text = hhh tweet.user.friends_count
       load_and_show_avatar
     end
 
@@ -73,6 +73,18 @@ module Twitrrerr
     def get_temp_avatar_file_name
       x = @tweet.user.profile_image_uri.to_s.split('/')
       File.expand_path "#{x[-2]}_#{x[-1]}", Twitrrerr::TEMP_PATH
+    end
+
+    def hhh(number)
+      # TODO: give this method a different name… and probably rewrite it too.
+      case number
+      when (1_000...1_000_000)
+        "#{(number / 1_000.0).round 1}K"
+      when (1_000_000...1_000_000_000)
+        "#{(number / 1_000_000.0).round 1}M"
+      else
+        "#{number}"
+      end
     end
   end
 end

@@ -3,6 +3,7 @@ require 'twitrrerr/add_new_account_dialog'
 require 'twitrrerr/compose_widget'
 require 'twitrrerr/timeline'
 require 'twitrrerr/tweet'
+require 'twitrrerr/user_profile'
 
 require 'twitrrerr/ui/main_window'
 
@@ -31,7 +32,13 @@ module Twitrrerr
         obj.setContentsMargins 0, 0, 0, 0
       end
       connect_actions
-      load_accounts
+
+      begin
+        load_accounts
+      rescue Twitter::Error::TooManyRequests => e
+        Qt::MessageBox.critical self, tr("An error occurred"), e.message
+        exit 2
+      end
 
       trap "USR1" do
         puts "Trying to restart streams of all accounts"
@@ -151,11 +158,19 @@ module Twitrrerr
     # @param options [Hash] A customizable set of options.
     # @option options [String] :target_screen_name the target user's (i.e. view profile) screen name
     # @option options [Boolean] :preload preload the timeline
+    # @option options [Twitter::User] :user_obj User object
     def open_timeline(screen_name, type = :user, options = {})
       options = {
           target_screen_name: nil,
-          preload: true
+          preload: true,
+          user_obj: nil,
+          following: nil
       }.merge(options)
+
+      unless options[:target_screen_name].nil? and type == :user
+        options[:user_obj] ||= @accounts[screen_name][:client].user options[:target_screen_name]
+        options[:following] ||= @accounts[screen_name][:client].friendship?(options[:user_obj], @accounts[screen_name][:client].user)
+      end
 
       @timelines[:"#{type}_#{screen_name}"] = Timeline.new(screen_name, type, nil, options)
       connect self, SIGNAL('new_tweet(QString, QString, QVariant, QString)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QString, QVariant, QString)')
