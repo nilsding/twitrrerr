@@ -27,7 +27,8 @@ module Twitrrerr
       @ui.ql_screen_name.text = tweet.user.screen_name
       @ui.ql_timestamp.text = tweet.created_at.strftime '%H:%M'
       @ui.ql_tweet_text.text = tweet.full_text
-      # TODO: @ui.ql_avatar.pixmap = ... tweet.user.profile_image_uri ...
+      @ui.ql_followers_count.text = tweet.user.followers_count
+      @ui.ql_friends_count.text = tweet.user.friends_count
       load_and_show_avatar
     end
 
