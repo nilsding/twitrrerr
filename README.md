@@ -1,6 +1,6 @@
 # twitrrerr
 
-A simple Twitter client.  You might not want this.
+A simple Twitter client, made by myself, for myself.  **You** might not want this.
 
 ## Requirements
 
