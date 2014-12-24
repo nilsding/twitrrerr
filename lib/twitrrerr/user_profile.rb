@@ -20,12 +20,12 @@ class UserProfile < Qt::Widget
 
     @user = user
     @following = following
-    @ui.ql_display_name.text = user.name unless user.name == Twitter::NullObject
+    @ui.ql_display_name.text = user.name unless user.name.is_a? Twitter::NullObject
     @ui.ql_screen_name.text = "@#{user.screen_name}"
     @ui.ql_followers_count.text = user.followers_count
     @ui.ql_friends_count.text = user.friends_count
     @ui.ql_tweets_count.text = user.statuses_count
-    @ui.ql_bio.text = user.description unless user.description == Twitter::NullObject
+    @ui.ql_bio.text = user.description unless user.description.is_a? Twitter::NullObject
     @ui.ql_follows_you.hide unless following
     load_and_show_avatar
   end
