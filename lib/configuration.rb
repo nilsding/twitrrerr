@@ -1,6 +1,6 @@
 module Twitrrerr
   # Twitrrerr version number
-  VERSION = '0.0.1'
+  VERSION = '0.1.0'
 
   # Path to the configuration directory
   CONFIG_PATH = File.expand_path('./.twitrrerr', Dir.home)
