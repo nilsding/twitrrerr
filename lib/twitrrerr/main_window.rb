@@ -31,14 +31,19 @@ module Twitrrerr
         obj.setSizeConstraint Qt::Layout::SetNoConstraint
         obj.setContentsMargins 0, 0, 0, 0
       end
+
       connect_actions
 
       begin
         load_accounts
       rescue Twitter::Error::TooManyRequests => e
+        puts "rate limit hit, reset: #{e.rate_limit.reset_at}"
         Qt::MessageBox.critical self, tr("An error occurred"), e.message
         exit 2
       end
+
+      @tray_icon = Qt::SystemTrayIcon.new
+      @tray_icon.show
 
       trap "USR1" do
         puts "Trying to restart streams of all accounts"
@@ -134,7 +139,10 @@ module Twitrrerr
       case object
         when Twitter::Tweet
           emit new_tweet(screen_name, :home.to_s, object.to_variant, '')
-          emit new_tweet(screen_name, :mentions.to_s, object.to_variant, '') if object.text.include? "@#{screen_name}"
+          if object.text.include? "@#{screen_name}"
+            emit new_tweet(screen_name, :mentions.to_s, object.to_variant, '')
+            @tray_icon.showMessage("New mention!", object.text)
+          end
         when Twitter::DirectMessage
           puts "direct message GET"
         when Twitter::Streaming::DeletedTweet
@@ -201,6 +209,7 @@ module Twitrrerr
     private
 
     :timelines
+    :tray_icon
 
     def add_new_account_action
       dlg = AddNewAccountDialog.new self
