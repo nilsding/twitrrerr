@@ -286,14 +286,22 @@ module Twitrrerr
     # I wanted to make these two methods using method_missing, but I failed ;_;
 
     def open_timeline_home
-      open_timeline @ui.compose_widget.ui.qcb_account.currentText, :home, preload: true
+      type = :home
+      screen_name = @ui.compose_widget.ui.qcb_account.currentText
+      timeline_name = :"#{type}_#{screen_name}"
+
+      open_timeline screen_name, type, preload: true if @timelines[timeline_name].nil?
     rescue Twitter::Error::TooManyRequests => e
       puts "rate limit hit, reset: #{e.rate_limit.reset_at}"
       Qt::MessageBox.critical self, tr("An error occurred"), e.message
     end
 
     def open_timeline_mentions
-      open_timeline @ui.compose_widget.ui.qcb_account.currentText, :mentions, preload: true
+      type = :mentions
+      screen_name = @ui.compose_widget.ui.qcb_account.currentText
+      timeline_name = :"#{type}_#{screen_name}"
+
+      open_timeline screen_name, type, preload: true if @timelines[timeline_name].nil?
     rescue Twitter::Error::TooManyRequests => e
       puts "rate limit hit, reset: #{e.rate_limit.reset_at}"
       Qt::MessageBox.critical self, tr("An error occurred"), e.message
