@@ -24,12 +24,23 @@ module Twitrrerr
       connect self, SIGNAL('avatar_loaded(QString)'), self, SLOT('avatar_loaded(QString)')
 
       @tweet = tweet
-      @ui.ql_screen_name.text = tweet.user.screen_name
+      if tweet.retweet?
+        @ui.ql_screen_name.text = tweet.retweeted_tweet.user.screen_name
+        @ui.ql_tweet_text.text = tweet.retweeted_tweet.full_text
+        @ui.ql_followers_count.text = hhh tweet.retweeted_tweet.user.followers_count
+        @ui.ql_friends_count.text = hhh tweet.retweeted_tweet.user.friends_count
+        @ui.ql_retweeter.visible = true
+        @ui.ql_retweeter.text = tr("Retweeted by @#{tweet.user.screen_name}")
+        load_and_show_avatar tweet.retweeted_tweet.user
+      else
+        @ui.ql_screen_name.text = tweet.user.screen_name
+        @ui.ql_tweet_text.text = tweet.full_text
+        @ui.ql_followers_count.text = hhh tweet.user.followers_count
+        @ui.ql_friends_count.text = hhh tweet.user.friends_count
+        @ui.ql_retweeter.visible = false
+        load_and_show_avatar tweet.user
+      end
       @ui.ql_timestamp.text = tweet.created_at.strftime '%H:%M'
-      @ui.ql_tweet_text.text = tweet.full_text
-      @ui.ql_followers_count.text = hhh tweet.user.followers_count
-      @ui.ql_friends_count.text = hhh tweet.user.friends_count
-      load_and_show_avatar
     end
 
     private
@@ -55,12 +66,13 @@ module Twitrrerr
       end
     end
 
-    def load_and_show_avatar
+    # @param user [Twitter::User]
+    def load_and_show_avatar(user)
       Thread.new do
-        file_name = get_temp_avatar_file_name
+        file_name = get_temp_avatar_file_name user
         @@mutex.synchronize do
           unless File.exists? file_name
-            response = HTTParty.get @tweet.user.profile_image_uri
+            response = HTTParty.get user.profile_image_uri
             File.open file_name, 'wb' do |f|
               f.write response.body
             end
@@ -70,8 +82,8 @@ module Twitrrerr
       end
     end
 
-    def get_temp_avatar_file_name
-      x = @tweet.user.profile_image_uri.to_s.split('/')
+    def get_temp_avatar_file_name(user)
+      x = user.profile_image_uri.to_s.split('/')
       File.expand_path "#{x[-2]}_#{x[-1]}", Twitrrerr::TEMP_PATH
     end
 
