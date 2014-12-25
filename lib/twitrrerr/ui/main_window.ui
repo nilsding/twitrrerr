@@ -81,6 +81,14 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <widget class="QMenu" name="menu_add_timeline">
+     <property name="title">
+      <string>Add &amp;timeline</string>
+     </property>
+     <addaction name="action_add_timeline_home"/>
+     <addaction name="action_add_timeline_mentions"/>
+    </widget>
+    <addaction name="menu_add_timeline"/>
     <addaction name="action_go_to_user"/>
    </widget>
    <addaction name="menu_file"/>
@@ -96,12 +104,28 @@
     <string>&amp;Go to user…</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+G</string>
+    <string>Ctrl+T, Ctrl+U</string>
    </property>
   </action>
   <action name="action_Quit">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="action_add_timeline_home">
+   <property name="text">
+    <string>&amp;Home</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T, Ctrl+H</string>
+   </property>
+  </action>
+  <action name="action_add_timeline_mentions">
+   <property name="text">
+    <string>&amp;Mentions</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T, Ctrl+M</string>
    </property>
   </action>
  </widget>

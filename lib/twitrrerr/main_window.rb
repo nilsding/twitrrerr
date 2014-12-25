@@ -14,7 +14,9 @@ module Twitrrerr
 
     slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)', 'tweet_added(QWidget*)'
     signals 'new_tweet(QString, QString, QVariant, QString)'
-    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)', 'favourite(QVariant)', 'close_timeline(QString)'
+    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)',
+                  'retweet(QVariant)', 'favourite(QVariant)', 'close_timeline(QString)',
+                  'open_timeline_home()', 'open_timeline_mentions()'
 
     attr_accessor :accounts
     attr_reader :timelines
@@ -68,6 +70,8 @@ module Twitrrerr
     def connect_actions
       connect @ui.action_add_new_account, SIGNAL('triggered()'), self, SLOT('add_new_account_action()')
       connect @ui.action_go_to_user, SIGNAL('triggered()'), self, SLOT('open_user_profile_action()')
+      connect @ui.action_add_timeline_home, SIGNAL('triggered()'), self, SLOT('open_timeline_home()')
+      connect @ui.action_add_timeline_mentions, SIGNAL('triggered()'), self, SLOT('open_timeline_mentions()')
       connect @ui.compose_widget, SIGNAL('publish_tweet(QString, QString)'), self, SLOT('publish_tweet(QString, QString)')
     end
 
@@ -277,6 +281,22 @@ module Twitrrerr
       @timelines_view.removeWidget @timelines[timeline_name]
       @timelines[timeline_name].dispose
       @timelines.delete timeline_name
+    end
+
+    # I wanted to make these two methods using method_missing, but I failed ;_;
+
+    def open_timeline_home
+      open_timeline @ui.compose_widget.ui.qcb_account.currentText, :home, preload: true
+    rescue Twitter::Error::TooManyRequests => e
+      puts "rate limit hit, reset: #{e.rate_limit.reset_at}"
+      Qt::MessageBox.critical self, tr("An error occurred"), e.message
+    end
+
+    def open_timeline_mentions
+      open_timeline @ui.compose_widget.ui.qcb_account.currentText, :mentions, preload: true
+    rescue Twitter::Error::TooManyRequests => e
+      puts "rate limit hit, reset: #{e.rate_limit.reset_at}"
+      Qt::MessageBox.critical self, tr("An error occurred"), e.message
     end
   end
 end
