@@ -229,6 +229,8 @@ module Twitrrerr
       tweet = tweet.to_object
       return unless tweet.is_a? Twitter::Tweet
 
+      tweet = tweet.retweeted_tweet if tweet.retweet?
+
       @ui.compose_widget.in_reply_to_id = tweet.id
       @ui.compose_widget.retweet = false
 
@@ -249,6 +251,8 @@ module Twitrrerr
       tweet = tweet.to_object
       return unless tweet.is_a? Twitter::Tweet
 
+      tweet = tweet.retweeted_tweet if tweet.retweet?
+
       @ui.compose_widget.in_reply_to_id = tweet.id
       @ui.compose_widget.ui.qte_tweet.document.plainText = "RT @#{tweet.user.screen_name}: #{tweet.full_text}"
       @ui.compose_widget.retweet = true
@@ -257,6 +261,8 @@ module Twitrrerr
     def favourite(tweet)
       tweet = tweet.to_object
       return unless tweet.is_a? Twitter::Tweet
+
+      tweet = tweet.retweeted_tweet if tweet.retweet?
 
       @accounts[@ui.compose_widget.ui.qcb_account.currentText][:client].favorite tweet.id
     rescue => e
