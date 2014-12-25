@@ -14,7 +14,7 @@ module Twitrrerr
 
     slots 'new_account_added(QString, QString, QString)', 'publish_tweet(QString, QString)', 'tweet_added(QWidget*)'
     signals 'new_tweet(QString, QString, QVariant, QString)'
-    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)', 'favourite(QVariant)'
+    private_slots 'add_new_account_action()', 'open_user_profile_action()', 'reply_to_tweet(QVariant)', 'retweet(QVariant)', 'favourite(QVariant)', 'close_timeline(QString)'
 
     attr_accessor :accounts
     attr_reader :timelines
@@ -177,15 +177,20 @@ module Twitrrerr
           following: nil
       }.merge(options)
 
+      raise ':target_screen_name is nil!' if options[:target_screen_name].nil? and type == :user
+
       unless options[:target_screen_name].nil? and type == :user
         options[:user_obj] ||= @accounts[screen_name][:client].user options[:target_screen_name]
         options[:following] ||= @accounts[screen_name][:client].friendship?(options[:user_obj], @accounts[screen_name][:client].user)
       end
 
-      @timelines[:"#{type}_#{screen_name}"] = Timeline.new(screen_name, type, nil, options)
-      connect self, SIGNAL('new_tweet(QString, QString, QVariant, QString)'), @timelines[:"#{type}_#{screen_name}"], SLOT('new_tweet(QString, QString, QVariant, QString)')
-      connect @timelines[:"#{type}_#{screen_name}"], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
-      @timelines_view.addWidget @timelines[:"#{type}_#{screen_name}"]
+      timeline_name = :"#{type}_#{screen_name}#{'_' + options[:target_screen_name] if type == :user}"
+
+      @timelines[timeline_name] = Timeline.new(screen_name, type, nil, options)
+      connect self, SIGNAL('new_tweet(QString, QString, QVariant, QString)'), @timelines[timeline_name], SLOT('new_tweet(QString, QString, QVariant, QString)')
+      connect @timelines[timeline_name], SIGNAL('tweet_added(QWidget*)'), self, SLOT('tweet_added(QWidget*)')
+      connect @timelines[timeline_name], SIGNAL('close_clicked(QString)'), self, SLOT('close_timeline(QString)')
+      @timelines_view.addWidget @timelines[timeline_name]
 
       if options[:preload]
         puts "Preloading #{type}_timeline for user #{screen_name}... please wait"
@@ -198,9 +203,7 @@ module Twitrrerr
             emit new_tweet(screen_name, type.to_s, object.to_variant, (type == :user ? options[:target_screen_name] : ''))
           end
         rescue => e
-          @timelines_view.removeWidget @timelines[:"#{type}_#{screen_name}"]
-          @timelines[:"#{type}_#{screen_name}"].dispose
-          @timelines.delete :"#{type}_#{screen_name}"
+          close_timeline timeline_name
           Qt::MessageBox.critical self, tr("An error occurred"), e.message
         end
       end
@@ -267,6 +270,13 @@ module Twitrrerr
       @accounts[@ui.compose_widget.ui.qcb_account.currentText][:client].favorite tweet.id
     rescue => e
       Qt::MessageBox.critical self, tr("An error occurred"), e.message
+    end
+
+    def close_timeline(timeline_name)
+      timeline_name = :"#{timeline_name}" if timeline_name.is_a? String
+      @timelines_view.removeWidget @timelines[timeline_name]
+      @timelines[timeline_name].dispose
+      @timelines.delete timeline_name
     end
   end
 end

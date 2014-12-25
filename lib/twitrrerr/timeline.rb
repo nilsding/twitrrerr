@@ -5,7 +5,8 @@ module Twitrrerr
   class Timeline < Qt::Widget
 
     slots 'new_tweet(QString, QString, QVariant, QString)'
-    signals 'tweet_added(QWidget*)'
+    signals 'tweet_added(QWidget*)', 'close_clicked(QString)'
+    private_slots 'qpb_close_clicked()'
 
     attr_reader :ui
     attr_reader :tweets_view
@@ -21,6 +22,9 @@ module Twitrrerr
       super parent
       @ui = Ui::Timeline.new
       @ui.setupUi self
+
+      connect @ui.qpb_close, SIGNAL('clicked()'), self, SLOT('qpb_close_clicked()')
+
       @ui.ql_timeline_name.text = "#{get_timeline_name(timeline_type, @options[:target_screen_name])} (#{screen_name})"
       @tweets = {}
       @tweets_view = Qt::VBoxLayout.new @ui.qsa_tweets_content do |obj|
@@ -67,5 +71,9 @@ module Twitrrerr
           tr('Unknown timeline')
         end
       end
+
+    def qpb_close_clicked
+      emit close_clicked("#{@timeline_type}_#{@screen_name}#{'_' + @user.screen_name if @timeline_type == :user}")
+    end
   end
 end
