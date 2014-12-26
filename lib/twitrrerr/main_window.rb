@@ -145,7 +145,11 @@ module Twitrrerr
           emit new_tweet(screen_name, :home.to_s, object.to_variant, '')
           if object.text.include? "@#{screen_name}"
             emit new_tweet(screen_name, :mentions.to_s, object.to_variant, '')
-            @tray_icon.showMessage("New mention!", object.text)
+            if object.retweet?
+              @tray_icon.showMessage("@#{object.user.screen_name} retweeted you", object.retweeted_tweet.text)
+            else
+              @tray_icon.showMessage("@#{object.user.screen_name} mentioned you", object.text)
+            end
           end
         when Twitter::DirectMessage
           puts "direct message GET"
