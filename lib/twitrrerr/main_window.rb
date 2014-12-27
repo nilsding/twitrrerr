@@ -147,9 +147,9 @@ module Twitrrerr
           if object.text.include? "@#{screen_name}"
             emit new_tweet(screen_name, :mentions.to_s, object.to_variant, '')
             if object.retweet?
-              @tray_icon.showMessage("@#{object.user.screen_name} retweeted you", object.retweeted_tweet.text)
+              Qt.execute_in_main_thread(false) { @tray_icon.showMessage("@#{object.user.screen_name} retweeted you", object.retweeted_tweet.text) }
             else
-              @tray_icon.showMessage("@#{object.user.screen_name} mentioned you", object.text)
+              Qt.execute_in_main_thread(false) { @tray_icon.showMessage("@#{object.user.screen_name} mentioned you", object.text) }
             end
           end
         when Twitter::DirectMessage
