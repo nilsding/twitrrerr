@@ -17,6 +17,7 @@ module Twitrrerr
       super parent
       @ui = Ui::ComposeWidget.new
       @ui.setupUi self
+      @ui.ql_in_reply_to_tweet_text.visible = false
 
       @in_reply_to_id = nil
       @retweet = false

@@ -102,6 +102,7 @@ module Twitrrerr
       end
       @ui.compose_widget.ui.qte_tweet.document.clear
       @ui.compose_widget.in_reply_to_id = nil
+      @ui.compose_widget.ui.ql_in_reply_to_tweet_text.visible = false
     rescue Twitter::Error::DuplicateStatus
       Qt::MessageBox.warning self, tr("An error occurred"), tr('Status is a duplicate')
     rescue => e
@@ -236,6 +237,7 @@ module Twitrrerr
       end
     end
 
+    # @param tweet [Twitter::Tweet]
     def reply_to_tweet(tweet)
       tweet = tweet.to_object
       return unless tweet.is_a? Twitter::Tweet
@@ -244,6 +246,8 @@ module Twitrrerr
 
       @ui.compose_widget.in_reply_to_id = tweet.id
       @ui.compose_widget.retweet = false
+      @ui.compose_widget.ui.ql_in_reply_to_tweet_text.text = tweet.text
+      @ui.compose_widget.ui.ql_in_reply_to_tweet_text.visible = true
 
       users_string = "@#{users(@ui.compose_widget.ui.qcb_account.currentText, tweet).join(" @")} "
 
