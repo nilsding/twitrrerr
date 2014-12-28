@@ -4,6 +4,7 @@ require 'twitrrerr/compose_widget'
 require 'twitrrerr/timeline'
 require 'twitrrerr/tweet'
 require 'twitrrerr/user_profile'
+require 'twitrrerr/tray_icon'
 
 require 'twitrrerr/ui/main_window'
 
@@ -44,7 +45,7 @@ module Twitrrerr
         exit 2
       end
 
-      @tray_icon = Qt::SystemTrayIcon.new
+      @tray_icon = Twitrrerr::TrayIcon.new
       @tray_icon.show
 
       trap "USR1" do
