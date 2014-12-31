@@ -24,23 +24,20 @@ module Twitrrerr
       connect self, SIGNAL('avatar_loaded(QString)'), self, SLOT('avatar_loaded(QString)')
 
       @tweet = tweet
-      if tweet.retweet?
-        @ui.ql_screen_name.text = tweet.retweeted_tweet.user.screen_name
-        @ui.ql_tweet_text.text = tweet.retweeted_tweet.full_text
-        @ui.ql_followers_count.text = hhh tweet.retweeted_tweet.user.followers_count
-        @ui.ql_friends_count.text = hhh tweet.retweeted_tweet.user.friends_count
-        @ui.ql_retweeter.visible = true
-        @ui.ql_retweeter.text = tr("Retweeted by @#{tweet.user.screen_name}")
-        load_and_show_avatar tweet.retweeted_tweet.user
-      else
-        @ui.ql_screen_name.text = tweet.user.screen_name
-        @ui.ql_tweet_text.text = tweet.full_text
-        @ui.ql_followers_count.text = hhh tweet.user.followers_count
-        @ui.ql_friends_count.text = hhh tweet.user.friends_count
-        @ui.ql_retweeter.visible = false
-        load_and_show_avatar tweet.user
-      end
       @ui.ql_timestamp.text = tweet.created_at.strftime '%H:%M'
+      if tweet.retweet?
+        @ui.ql_retweeter.text = tr("Retweeted by @#{tweet.user.screen_name}")
+        @ui.ql_retweeter.visible = true
+        @tweet = tweet.retweeted_tweet
+      else
+        @ui.ql_retweeter.visible = false
+      end
+      @ui.ql_screen_name.text = @tweet.user.screen_name
+      @ui.ql_tweet_text.text = @tweet.full_text
+      @ui.ql_followers_count.text = hhh @tweet.user.followers_count
+      @ui.ql_friends_count.text = hhh @tweet.user.friends_count
+      @ui.ql_client.text = "via #{@tweet.source.match(/\<.+\>(.*)\<\/.+\>/)[1]}"
+      load_and_show_avatar @tweet.user
     end
 
     private
