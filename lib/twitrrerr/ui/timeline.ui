@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>325</width>
+    <width>375</width>
     <height>100</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>325</width>
+    <width>375</width>
     <height>100</height>
    </size>
   </property>
@@ -46,9 +46,12 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Maximum</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>500</width>
          <height>20</height>
         </size>
        </property>
@@ -56,6 +59,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="qpb_close">
+       <property name="maximumSize">
+        <size>
+         <width>32</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="font">
         <font>
          <weight>75</weight>
@@ -91,8 +100,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>303</width>
-        <height>64</height>
+        <width>351</width>
+        <height>57</height>
        </rect>
       </property>
      </widget>
